@@ -3,7 +3,7 @@ using LibraryManager;
 
 class Program
 {
-    static Library<Book> library = new Library<Book>();
+    static Library library = new Library();
 
     static void Main(string[] args)
     {
@@ -36,6 +36,9 @@ class Program
                     library.PrintBorrowedBooks();
                     break;
                 case "7":
+                    Console.WriteLine("Search books");
+                    return;
+                case "8":
                     Console.WriteLine("Exiting program");
                     return;
                 default:
@@ -50,8 +53,8 @@ class Program
         Console.Clear();
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.Title = "LIBRARY MANAGER";
-        Console.WriteLine("\n\n--------------Welcome to Library manager--------------\n\n");
-        Console.WriteLine("\n\nPress enter to continue\n");
+        Console.WriteLine("\n\n-------------- Welcome to Library manager --------------\n\n");
+        Console.WriteLine("\n\nPress enter to continue\n\n");
         Console.ReadLine();
     }
     static void DisplayMenu()
@@ -66,61 +69,18 @@ class Program
         Console.WriteLine("6: Print borrowed books");
         Console.WriteLine("7: Search books");
         Console.WriteLine("8: Exit");
-        Console.Write("Enter your choice: ");
+        Console.Write("\nEnter your choice: \n");
     }
 
     static void ProcessBookAction(BookAction action)
     {
         Console.ResetColor();
-
         string actionString = action.ToString().ToLower();
-        Console.WriteLine($"Enter the details of the book you want to {actionString}");
-       
-        string title;
-        do
-        {
+        Console.WriteLine($"\nEnter the details of the book you want to {actionString}: \n");
 
-            Console.WriteLine("Title: ");
-            title = Console.ReadLine();
-
-            if (string.IsNullOrWhiteSpace(title))
-            {
-                Console.ResetColor();
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Title cannot be empty. Please try again");
-            }
-        } while (string.IsNullOrWhiteSpace(title));
-
-       
-        string author;
-        do
-        {
-            Console.WriteLine("Author: "); 
-            author = Console.ReadLine();
-
-            if (string.IsNullOrWhiteSpace(author))
-            {
-                Console.ResetColor();
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Author cannot be empty. Please try again");
-            }
-        } while (string.IsNullOrWhiteSpace(author));
-
-      
-        string isbn;
-        bool isValidIsbn;
-        do
-        {
-            Console.WriteLine("ISBN: must contain 10 or 13 characters");
-            isbn = Console.ReadLine();
-
-            isValidIsbn = ISBNValidator.IsValidISBN(isbn);
-            if (!isValidIsbn)
-            {
-                Console.ForegroundColor= ConsoleColor.Red;
-                Console.WriteLine("Invalid ISBN. Must contain 10 or 13 characters. Please try again.");
-            }
-        } while (!isValidIsbn);
+        string title = GetInput("Title: ");
+        string author = GetInput("Author: ");
+        string isbn = GetISBN();
 
         Book newBook = new Book(title, author, isbn);
 
@@ -128,22 +88,55 @@ class Program
         switch (action)
         {
             case BookAction.Add:
-                library.AddBook(newBook);
-                    Console.WriteLine("Book added successfully.");
+                library.ManageBookActions(newBook, "add");
                 break;
             case BookAction.Delete:
-                library.DeleteBook(newBook);
-                Console.WriteLine("Book deleted successfully.");
+                library.ManageBookActions(newBook, "delete");
                 break;
             case BookAction.Borrow:
-                library.BorrowBook(newBook);
-                Console.WriteLine("Book borrowed successfully.");
+                library.ManageBookActions(newBook, "borrow");
                 break;
             case BookAction.Return:
-                library.ReturnBook(newBook);
-                Console.WriteLine("Book returned successfully.");
+                library.ManageBookActions(newBook, "return");
                 break;
         }
+    }
+
+    static string GetInput(string prompt)
+    {
+        string input;
+        do
+        {
+            Console.WriteLine(prompt);
+            input = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"{prompt.TrimEnd(':')} cannot be empty. Please try again");
+            }
+        } while (string.IsNullOrWhiteSpace(input));
+        return input;
+    }
+
+    static string GetISBN()
+    {
+        string isbn;
+        bool isValidIsbn;
+        do
+        {
+            Console.WriteLine("\nISBN: must contain 20 or 13 characters\n");
+            isbn = Console.ReadLine();
+
+            isValidIsbn = ISBNValidator.IsValidISBN(isbn);
+            if (!isValidIsbn)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Invalid ISBN. Must contain 10 or 13 characters. Please try again");
+            }
+        } while (!isValidIsbn);
+        return isbn;
     }
 }
 

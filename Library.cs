@@ -5,67 +5,138 @@ namespace LibraryManager
 {
 
 
-    public class Library<T> : IStorable<T>
+    public class Library
     {
-        private List<T> bookList = new List<T>();
-        private List<T> borrowedBookList = new List<T>();
+        private List<Book> bookList = new List<Book>();
 
-        public void AddBook(T book)
+        public void ManageBookAction(Book book, string action)
         {
-            bookList.Add(book);
-        }
-
-        public void DeleteBook(T book)
-        {
-            bookList.Remove(book);
-        }
-
-        public void ReturnBook(T book)
-        {
-            borrowedBookList.Remove(book);
-            bookList.Add(book);
-        }
-
-        public void BorrowBook(T book)
-        {
-            borrowedBookList.Add(book);
-            bookList.Remove(book);
-        }
-
-        public void PrintAvailableBooks()
-        {
-            Console.WriteLine("=== Available Books ===");
-            foreach (var book in bookList)
+            switch (action.ToLower())
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"Title: {((Book)(object)book).Title}");
-                Console.WriteLine($"Author: {((Book)(object)book).Author}");
-                Console.WriteLine($"ISBN: {((Book)(object)book).ISBN}");
-                Console.WriteLine("------------------------");
+                case "add":
+                    if (!bookList.Contains(book))
+                    {
+                        bookList.Add(book);
+                        Console.WriteLine(DisplayMessage("added"));
+                    }
+                    else
+                    {
+                        Console.WriteLine(DisplayMessage("exists"));
+                    }
+                    break;
+                case "delete":
+                    if (bookList.Contains(book))
+                    {
+                        bookList.Remove(book);
+                        Console.WriteLine(DisplayMessage("deleted"));
+                    }
+                    else
+                    {
+                        Console.WriteLine(DisplayMessage("not found"));
+                    }
+                    break;
+                case "borrow":
+                    if (bookList.Contains(book))
+                    {
+                        bookList[bookList.IndexOf(book)].IsBorrowed = true; 
+                        Console.WriteLine(DisplayMessage("borrowed"));
+                    }
+                    else
+                    {
+                        Console.WriteLine(DisplayMessage("not found"));
+                    }
+                    break;
+                case "return":
+                    if (bookList.Contains(book))
+                    {
+                        bookList[bookList.IndexOf(book)].IsBorrowed = false;
+                        Console.WriteLine(DisplayMessage("returned"));
+                    }
+                    else
+                    {
+                        Console.WriteLine(DisplayMessage("not found"));
+                    }
+                    break;
+
+                default:
+                    Console.WriteLine("Invalid action");
+                    break;
             }
         }
 
-        public void PrintBorrowedBooks()
+        public static string DisplayMessage(string action)
         {
-            Console.WriteLine("=== Borrowed Books ===");
-            foreach (var book in borrowedBookList)
+            switch (action.ToLower())
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"Title: {((Book)(object)book).Title}");
-                Console.WriteLine($"Author: {((Book)(object)book).Author}");
-                Console.WriteLine($"ISBN: {((Book)(object)book).ISBN}");
-                Console.WriteLine("------------------------");
+                case "added":
+                    return "Book added successfully";
+                case "deleted":
+                    return "Book deleted successfully";
+                case "not found":
+                    return "Book not found in the library";
+                case "exists":
+                    return "Book already exists in the library";
+                case "borrowed":
+                    return "Book borrowed successfully";
+                case "returned":
+                    return "Book returned successfully";
+                default:
+                    return "Invalid action";
             }
         }
 
-        public void Save(List<T> items, string filePath)
+        public void PrintBooks(PrintMode mode = PrintMode.All)
         {
-            throw new NotImplementedException();
+            switch (mode)
+            {
+                case PrintMode.Available:
+                    Console.WriteLine("=== Available Books ===");
+                    foreach (var book in bookList)
+                    {
+                        if (!book.IsBorrowed)
+                        {
+                            PrintBookDetails(book);
+                        }
+                    }
+                    break;
+                case PrintMode.Borrowed:
+                    Console.WriteLine("=== Borrowed Books ===");
+                    foreach (var book in bookList)
+                    {
+                        if (book.IsBorrowed)
+                        {
+                            PrintBookDetails(book);
+                        }
+                    }
+                    break;
+                case PrintMode.All:
+                    Console.WriteLine("=== All Books ===");
+                    foreach (var book in bookList)
+                    {
+                        PrintBookDetails(book);
+                    }
+                    break;
+                default:
+                    Console.WriteLine("Invalid printing mode");
+                    break;
+            }
         }
 
-        public List<T> Load(string filePath)
+        private void PrintBookDetails(Book book)
         {
-            throw new NotImplementedException();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"Title: {book.Title}");
+            Console.WriteLine($"Author: {book.Author}");
+            Console.WriteLine($"ISBN: {book.ISBN}");
+            Console.WriteLine("------------------------");
+        }
+
+
+        public enum PrintMode
+        {
+            Available,
+            Borrowed,
+            All
         }
     }
 }

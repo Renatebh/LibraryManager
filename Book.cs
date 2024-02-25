@@ -5,24 +5,22 @@ using System.Threading.Tasks;
 
 namespace LibraryManager
 {
-    public class Book
+    public class Book : MediaItem
     {
         // Properties
-        public string Title { get; set; }
+        
         public string Author { get; set; }
         public string ISBN { get; set; }
-
-        public bool IsBorrowed { get; set; }
+        public bool IsEbook { get; set; }
 
 
         // Constructor
-        public Book(string title, string author, string isbn)
+        public Book(string title, string author, string isbn, bool isEbook) : base (title, false)
         {
 
-            Title = title;
             Author = author;
             ISBN = isbn;
-            IsBorrowed = false;
+            IsEbook = false;
         }
 
         public override bool Equals(object? obj)

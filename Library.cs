@@ -7,16 +7,16 @@ namespace LibraryManager
 
     public class Library
     {
-        private List<Book> bookList = new List<Book>();
+        private List<MediaItem> itemList = new List<MediaItem>();
 
-        public void ManageBookAction(Book book, string action)
+        public void ManageItemAction(MediaItem item, string action, bool isEbook = false)
         {
             switch (action.ToLower())
             {
                 case "add":
-                    if (!bookList.Contains(book))
+                    if (!itemList.Contains(item))
                     {
-                        bookList.Add(book);
+                        itemList.Add(item);
                         Console.WriteLine(DisplayMessage("added"));
                     }
                     else
@@ -25,9 +25,9 @@ namespace LibraryManager
                     }
                     break;
                 case "delete":
-                    if (bookList.Contains(book))
+                    if (itemList.Contains(item))
                     {
-                        bookList.Remove(book);
+                        itemList.Remove(item);
                         Console.WriteLine(DisplayMessage("deleted"));
                     }
                     else
@@ -36,9 +36,9 @@ namespace LibraryManager
                     }
                     break;
                 case "borrow":
-                    if (bookList.Contains(book))
+                    if (itemList.Contains(item))
                     {
-                        bookList[bookList.IndexOf(book)].IsBorrowed = true; 
+                        item.IsBorrowed = true;
                         Console.WriteLine(DisplayMessage("borrowed"));
                     }
                     else
@@ -47,9 +47,9 @@ namespace LibraryManager
                     }
                     break;
                 case "return":
-                    if (bookList.Contains(book))
+                    if (itemList.Contains(item))
                     {
-                        bookList[bookList.IndexOf(book)].IsBorrowed = false;
+                        item.IsBorrowed = false;
                         Console.WriteLine(DisplayMessage("returned"));
                     }
                     else
@@ -64,6 +64,68 @@ namespace LibraryManager
             }
         }
 
+        
+
+        public void PrintItems(PrintMode mode = PrintMode.All)
+        {
+            switch (mode)
+            {
+                case PrintMode.Available:
+                    Console.WriteLine("=== Available Items ===");
+                    foreach (var item in itemList)
+                    {
+                        if (!item.IsBorrowed)
+                        {
+                            PrintBookDetails(item);
+                        }
+                    }
+                    break;
+                case PrintMode.Borrowed:
+                    Console.WriteLine("=== Borrowed Items ===");
+                    foreach (var item in itemList)
+                    {
+                        if (item.IsBorrowed)
+                        {
+                            PrintBookDetails(item);
+                        }
+                    }
+                    break;
+                case PrintMode.All:
+                    Console.WriteLine("=== All Items ===");
+                    foreach (var item in itemList)
+                    {
+                        PrintBookDetails(item);
+                    }
+                    break;
+                default:
+                    Console.WriteLine("Invalid printing mode");
+                    break;
+            }
+        }
+
+        private void PrintBookDetails(Book book)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"Title: {book.Title}");
+            Console.WriteLine($"Author: {book.Author}");
+            Console.WriteLine($"ISBN: {book.ISBN}");
+
+            if (book is EBook) 
+            { 
+                EBook eBook = (EBook)book;
+                Console.WriteLine($"File Path {eBook.FilePath}");
+                Console.WriteLine($"File Format {eBook.FileFormat}");
+            }
+            Console.WriteLine("\n------------------------\n");
+        }
+
+
+        public enum PrintMode
+        {
+            Available,
+            Borrowed,
+            All
+        }
         public static string DisplayMessage(string action)
         {
             switch (action.ToLower())
@@ -83,60 +145,6 @@ namespace LibraryManager
                 default:
                     return "Invalid action";
             }
-        }
-
-        public void PrintBooks(PrintMode mode = PrintMode.All)
-        {
-            switch (mode)
-            {
-                case PrintMode.Available:
-                    Console.WriteLine("=== Available Books ===");
-                    foreach (var book in bookList)
-                    {
-                        if (!book.IsBorrowed)
-                        {
-                            PrintBookDetails(book);
-                        }
-                    }
-                    break;
-                case PrintMode.Borrowed:
-                    Console.WriteLine("=== Borrowed Books ===");
-                    foreach (var book in bookList)
-                    {
-                        if (book.IsBorrowed)
-                        {
-                            PrintBookDetails(book);
-                        }
-                    }
-                    break;
-                case PrintMode.All:
-                    Console.WriteLine("=== All Books ===");
-                    foreach (var book in bookList)
-                    {
-                        PrintBookDetails(book);
-                    }
-                    break;
-                default:
-                    Console.WriteLine("Invalid printing mode");
-                    break;
-            }
-        }
-
-        private void PrintBookDetails(Book book)
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine($"Title: {book.Title}");
-            Console.WriteLine($"Author: {book.Author}");
-            Console.WriteLine($"ISBN: {book.ISBN}");
-            Console.WriteLine("------------------------");
-        }
-
-
-        public enum PrintMode
-        {
-            Available,
-            Borrowed,
-            All
         }
     }
 }

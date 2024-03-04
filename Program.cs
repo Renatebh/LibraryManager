@@ -1,4 +1,5 @@
 ﻿using System;
+using LibraryManager;
 using LibraryManager.media;
 using LibraryManager.service;
 using Microsoft.VisualBasic;
@@ -7,7 +8,7 @@ class Program
 {
     static Library library = new Library();
     static FileManager fileManager = new FileManager();
-
+    static BookSearch bookSearch = new BookSearch(library);
     public static string FilePath { get; } = "C:\\Users\\Renate Hem\\source\\repos\\LibraryManager\\data\\library_data.json";
 
     static void Main(string[] args)
@@ -20,7 +21,7 @@ class Program
         }
 
         DisplayWelcomeMessage();
-      
+
 
         while (true)
         {
@@ -62,6 +63,12 @@ class Program
                     fileManager.Load(Program.FilePath);
                     break;
                 case "11":
+                    Console.WriteLine("Enter the search term:");
+                    string searchTerm = Console.ReadLine();
+                    SearchBooks(searchTerm);
+                    break;
+                    break;
+                case "12":
                     Console.WriteLine("Exiting program");
                     return;
                 default:
@@ -97,12 +104,13 @@ class Program
         Console.WriteLine("8: Print All E-Books");
         Console.WriteLine("9: Save library to file");
         Console.WriteLine("10: Load library from file");
-        Console.WriteLine("11: Exit Program");
+        Console.WriteLine("11: Search books");
+        Console.WriteLine("12: Exit Program");
         Console.WriteLine();
         Console.Write("Enter your choice: ");
         Console.WriteLine();
     }
-    
+
     static void ProcessAction(BookAction action)
     {
         Console.ResetColor();
@@ -115,12 +123,6 @@ class Program
 
         string isbn = GetISBN();
         bool isEbook = action == BookAction.AddEBook;
-        // Inkluder feilsøkningsutskrift for å bekrefte at bokobjektene blir opprettet korrekt
-        // Console.WriteLine($"Creating new book: Title={title}, Author={author}, ISBN={isbn}, IsEbook={isEbook}");
-
-        // Inkluder feilsøkningsutskrift for å bekrefte hvilken handling som blir utført
-        // Console.WriteLine($"Performing action: {action}");
-  
 
         switch (action)
         {
@@ -129,15 +131,15 @@ class Program
             case BookAction.Borrow:
             case BookAction.Return:
                 bool isBorrowed = action == BookAction.Borrow;
-                Book newBook = new Book(title, author, isbn, isEbook, isBorrowed); 
+                Book newBook = new Book(title, author, isbn, isEbook, isBorrowed);
                 library.ManageBookAction(newBook, action);
                 break;
             case BookAction.AddEBook:
             case BookAction.DeleteEBook:
-               
+
                 string filePath = GetInput("File Path: ");
                 string fileFormat = GetInput("File Format: ");
-                EBook newEBook = new EBook(title, author, isbn, filePath, fileFormat); 
+                EBook newEBook = new EBook(title, author, isbn, filePath, fileFormat);
                 library.ManageBookAction(newEBook, action);
                 break;
             default:
@@ -182,15 +184,39 @@ class Program
         } while (!isValidIsbn);
         return isbn;
     }
+
+
+    static void SearchBooks(string searchTerm)
+    {
+        List<Book> searchResults = bookSearch.SearchBooks(searchTerm);
+        Console.WriteLine("\nSearch Results:\n");
+
+        if (searchResults.Count == 0)
+        {
+            Console.ForegroundColor= ConsoleColor.Red;
+            Console.WriteLine("No results found.");
+            Console.ResetColor();
+        }
+        else
+        {
+            foreach (var book in searchResults)
+            {
+                book.PrintBookDetails();
+            }
+        }
+
+        Console.WriteLine("Press Enter to continue...");
+        Console.ReadLine();
+    }
 }
 
-public enum BookAction
-{
-    AddBook,
-    PrintBook,
-    Delete,
-    Borrow,
-    Return,
-    AddEBook,
-    DeleteEBook
-}
+    public enum BookAction
+    {
+        AddBook,
+        PrintBook,
+        Delete,
+        Borrow,
+        Return,
+        AddEBook,
+        DeleteEBook
+    }

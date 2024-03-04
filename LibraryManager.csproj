@@ -11,4 +11,8 @@
     <PackageReference Include="ISBN" Version="1.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="data\" />
+  </ItemGroup>
+
 </Project>

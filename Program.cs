@@ -1,15 +1,26 @@
 ﻿using System;
-using LibraryManager;
+using LibraryManager.media;
+using LibraryManager.service;
 using Microsoft.VisualBasic;
 
 class Program
 {
     static Library library = new Library();
+    static FileManager fileManager = new FileManager();
+
+    public static string FilePath { get; } = "C:\\Users\\Renate Hem\\source\\repos\\LibraryManager\\data\\library_data.json";
 
     static void Main(string[] args)
     {
+
+        List<Book> loadedBooks = fileManager.Load(Program.FilePath);
+        foreach (var book in loadedBooks)
+        {
+            library.ManageBookAction(book, BookAction.AddBook); // Legg til boken i biblioteket
+        }
+
         DisplayWelcomeMessage();
-        GetIsEbook();
+      
 
         while (true)
         {
@@ -19,24 +30,38 @@ class Program
             switch (choice)
             {
                 case "1":
-                    ProcessItemAction(ItemAction.AddBook);
+                    ProcessAction(BookAction.AddBook);
                     break;
                 case "2":
-                    ProcessItemAction(ItemAction.AddMovie);
+                    ProcessAction(BookAction.AddEBook);
                     break;
                 case "3":
-                    ProcessItemAction(ItemAction.Delete);
+                    ProcessAction(BookAction.Delete);
                     break;
                 case "4":
-                    ProcessItemAction(ItemAction.Borrow);
+                    ProcessAction(BookAction.DeleteEBook);
                     break;
                 case "5":
-                    ProcessItemAction(ItemAction.Return);
+                    ProcessAction(BookAction.Borrow);
                     break;
                 case "6":
-                    //library.SearchItems();
+                    ProcessAction(BookAction.Return);
                     break;
                 case "7":
+                    library.SortBooks(Library.SortByTitle);
+                    library.PrintAllBooks();
+                    break;
+                case "8":
+                    library.SortBooks(Library.SortByTitle);
+                    library.PrintAllEBooks();
+                    break;
+                case "9":
+                    fileManager.Save(library.GetBookList(), Program.FilePath);
+                    break;
+                case "10":
+                    fileManager.Load(Program.FilePath);
+                    break;
+                case "11":
                     Console.WriteLine("Exiting program");
                     return;
                 default:
@@ -44,6 +69,7 @@ class Program
                     break;
             }
         }
+
     }
 
     static void DisplayWelcomeMessage()
@@ -56,58 +82,68 @@ class Program
         Console.ReadLine();
     }
 
-    
+
     static void DisplayMenu()
     {
         Console.ResetColor();
-        Console.WriteLine("=== Library Manager Menu ===");
+        Console.WriteLine("\n=== Library Manager Menu ===\n");
         Console.WriteLine("1: Add New Book");
-        Console.WriteLine("2: Add New Movie");
-        Console.WriteLine("3: Delete Item");
-        Console.WriteLine("4: Borrow Item");
-        Console.WriteLine("5: Return Item");
-        Console.WriteLine("6: Print all items");
-        Console.WriteLine("7: Print borrowed Items");
-        Console.WriteLine("8: Search Items");
-        Console.WriteLine("9: Exit");
-        Console.Write("\nEnter your choice: \n");
+        Console.WriteLine("2: Add New E-Book");
+        Console.WriteLine("3: Delete Book");
+        Console.WriteLine("4: Delete E-Book");
+        Console.WriteLine("5: Borrow Book");
+        Console.WriteLine("6: Return Book");
+        Console.WriteLine("7: Print All Books");
+        Console.WriteLine("8: Print All E-Books");
+        Console.WriteLine("9: Save library to file");
+        Console.WriteLine("10: Load library from file");
+        Console.WriteLine("11: Exit Program");
+        Console.WriteLine();
+        Console.Write("Enter your choice: ");
+        Console.WriteLine();
     }
-
-    static void ProcessItemAction(ItemAction action)
+    
+    static void ProcessAction(BookAction action)
     {
         Console.ResetColor();
         string actionString = action.ToString().ToLower();
-        Console.WriteLine($"\nEnter the details of the item you want to {actionString}: \n");
-
+        Console.WriteLine("\n\n----------------------------\n\n");
+        Console.WriteLine($"\nEnter the details of the book you want to {actionString}: \n");
+        Console.ForegroundColor = ConsoleColor.White;
         string title = GetInput("Title: ");
         string author = GetInput("Author: ");
-        string authorOrDirector = GetInput(action == ItemAction.AddBook ? "Author: " : "Director: ");
+
         string isbn = GetISBN();
-        bool isEbook = action == ItemAction.AddBook ? GetIsEbook() : false;
+        bool isEbook = action == BookAction.AddEBook;
+        // Inkluder feilsøkningsutskrift for å bekrefte at bokobjektene blir opprettet korrekt
+        // Console.WriteLine($"Creating new book: Title={title}, Author={author}, ISBN={isbn}, IsEbook={isEbook}");
 
-        if (action == ItemAction.AddBook)
-        {
-            Book newBook = new Book(title, author, isbn, isEbook);
-            library.ManageItemAction(newBook, action);
-        }
-        else if (action == ItemAction.AddMovie)
-        {
-            Movie newMovie = new Movie(title, false, director);
-            library.ManageItemAction(newMovie, action);
-        }
-    }
+        // Inkluder feilsøkningsutskrift for å bekrefte hvilken handling som blir utført
+        // Console.WriteLine($"Performing action: {action}");
+  
 
-    static bool GetIsEbook()
-    {
-        Console.WriteLine("Is this an ebook? (Y/N)");
-        string input = Console.ReadLine().Trim().ToUpper();
-
-        while (input != "Y" && input != "N")
+        switch (action)
         {
-            Console.WriteLine("Invalid input. Use Y or N");
-            input = Console.ReadLine().Trim().ToUpper();
+            case BookAction.AddBook:
+            case BookAction.Delete:
+            case BookAction.Borrow:
+            case BookAction.Return:
+                bool isBorrowed = action == BookAction.Borrow;
+                Book newBook = new Book(title, author, isbn, isEbook, isBorrowed); 
+                library.ManageBookAction(newBook, action);
+                break;
+            case BookAction.AddEBook:
+            case BookAction.DeleteEBook:
+               
+                string filePath = GetInput("File Path: ");
+                string fileFormat = GetInput("File Format: ");
+                EBook newEBook = new EBook(title, author, isbn, filePath, fileFormat); 
+                library.ManageBookAction(newEBook, action);
+                break;
+            default:
+                Console.WriteLine("Invalid action");
+                break;
         }
-        return input == "Y";
     }
     static string GetInput(string prompt)
     {
@@ -133,25 +169,28 @@ class Program
         bool isValidIsbn;
         do
         {
-            Console.WriteLine("\nISBN: must contain 20 or 13 characters\n");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("ISBN (10 or 13 characters): ");
             isbn = Console.ReadLine();
 
             isValidIsbn = ISBNValidator.IsValidISBN(isbn);
             if (!isValidIsbn)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Invalid ISBN. Must contain 10 or 13 characters. Please try again");
+                Console.WriteLine("Invalid ISBN. Please try again");
             }
         } while (!isValidIsbn);
         return isbn;
     }
 }
 
-public enum ItemAction
+public enum BookAction
 {
     AddBook,
-    AddMovie,
+    PrintBook,
     Delete,
     Borrow,
-    Return
+    Return,
+    AddEBook,
+    DeleteEBook
 }

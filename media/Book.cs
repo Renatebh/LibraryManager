@@ -4,6 +4,7 @@ namespace LibraryManager.media
 {
     public class Book
     {
+        public static int TotalBooks {get; set; }
         public string Title { get; set; }
         public string Author { get; set; }
         public string ISBN { get; set; }
@@ -18,6 +19,8 @@ namespace LibraryManager.media
             ISBN = isbn;
             IsEbook = isEbook;
             IsBorrowed = isBorrowed;
+
+            TotalBooks++;
         }
 
         public override bool Equals(object? obj)

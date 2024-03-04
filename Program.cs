@@ -20,7 +20,8 @@ class Program
             library.ManageBookAction(book, BookAction.AddBook); // Legg til boken i biblioteket
         }
 
-        DisplayWelcomeMessage();
+       
+        DisplayWelcomeMessage(); 
 
 
         while (true)
@@ -85,7 +86,8 @@ class Program
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.Title = "LIBRARY MANAGER";
         Console.WriteLine("\n\n-------------- Welcome to Library manager --------------\n\n");
-        Console.WriteLine("\n\nPress enter to continue\n\n");
+        Console.WriteLine($"\nTotalt antall bøker opprettet: {Book.TotalBooks}\n");
+        Console.WriteLine("\nPress enter to continue..\n");
         Console.ReadLine();
     }
 

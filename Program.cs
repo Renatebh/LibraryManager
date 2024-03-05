@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using LibraryManager;
 using LibraryManager.media;
 using LibraryManager.service;
@@ -9,7 +10,7 @@ class Program
     static Library library = new Library();
     static FileManager fileManager = new FileManager();
     static BookSearch bookSearch = new BookSearch(library);
-    public static string FilePath { get; } = "C:\\Users\\Renate Hem\\source\\repos\\LibraryManager\\data\\library_data.json";
+    public static string FilePath => "C:\\Users\\Renate Hem\\source\\repos\\LibraryManager\\data\\library_data.json";
 
     static void Main(string[] args)
     {
@@ -58,7 +59,7 @@ class Program
                     library.PrintAllEBooks();
                     break;
                 case "9":
-                    fileManager.Save(library.GetBookList(), Program.FilePath);
+                    fileManager.Save(library.Books(), Program.FilePath);
                     break;
                 case "10":
                     fileManager.Load(Program.FilePath);
@@ -67,7 +68,6 @@ class Program
                     Console.WriteLine("Enter the search term:");
                     string searchTerm = Console.ReadLine();
                     SearchBooks(searchTerm);
-                    break;
                     break;
                 case "12":
                     Console.WriteLine("Exiting program");
@@ -85,7 +85,7 @@ class Program
         Console.Clear();
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.Title = "LIBRARY MANAGER";
-        Console.WriteLine("\n\n-------------- Welcome to Library manager --------------\n\n");
+        Console.WriteLine("\n\n-------------- Welcome to Library Manager --------------\n\n");
         Console.WriteLine($"\nTotalt antall bøker opprettet: {Book.TotalBooks}\n");
         Console.WriteLine("\nPress enter to continue..\n");
         Console.ReadLine();
@@ -95,7 +95,7 @@ class Program
     static void DisplayMenu()
     {
         Console.ResetColor();
-        Console.WriteLine("\n=== Library Manager Menu ===\n");
+        Console.WriteLine("\n=== Library Menu ===\n");
         Console.WriteLine("1: Add New Book");
         Console.WriteLine("2: Add New E-Book");
         Console.WriteLine("3: Delete Book");
@@ -125,15 +125,16 @@ class Program
 
         string isbn = GetISBN();
         bool isEbook = action == BookAction.AddEBook;
+        
 
         switch (action)
-        {
+        { 
             case BookAction.AddBook:
             case BookAction.Delete:
             case BookAction.Borrow:
             case BookAction.Return:
                 bool isBorrowed = action == BookAction.Borrow;
-                Book newBook = new Book(title, author, isbn, isEbook, isBorrowed);
+                Book newBook = new Book(title, author, isbn, isBorrowed);
                 library.ManageBookAction(newBook, action);
                 break;
             case BookAction.AddEBook:

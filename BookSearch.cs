@@ -23,7 +23,7 @@ namespace LibraryManager
         public List<Book> SearchBooks(string searchTerm)
         {
             List<Book> results = new List<Book>();
-            foreach (var book in library.GetBookList())
+            foreach (var book in library.Books())
             {
                 if (book.Title.ToLower().Contains(searchTerm.ToLower()))
                 {

@@ -12,7 +12,7 @@ namespace LibraryManager.media
         public string FileFormat { get; set; }
 
         public EBook(string title, string author, string isbn, string filePath, string fileFormat)
-     : base(title, author, isbn, true, false)
+     : base(title, author, isbn, false)
         {
             FilePath = filePath;
             FileFormat = fileFormat;

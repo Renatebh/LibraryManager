@@ -15,10 +15,10 @@ namespace LibraryManager.service
         private void AddDefaultBooks()
         {
 
-            AddBook(new Book("The Great Gatsby", "F. Scott Fitzgerald", "978-0743273565", false, false));
-            AddBook(new Book("To Kill a Mockingbird", "Harper Lee", "978-0061120084", false, false));
-            AddBook(new Book("1984", "George Orwell", "978-0451524935", false, false));
-            AddBook(new Book("Pride and Prejudice", "Jane Austen", "978-0141439518", false, false));
+            AddBook(new Book("The Great Gatsby", "F. Scott Fitzgerald", "978-0743273565"));
+            AddBook(new Book("To Kill a Mockingbird", "Harper Lee", "978-0061120084"));
+            AddBook(new Book("1984", "George Orwell", "978-0451524935"));
+            AddBook(new Book("Pride and Prejudice", "Jane Austen", "978-0141439518"));
         }
 
 
@@ -64,9 +64,10 @@ namespace LibraryManager.service
             bookList.Sort((b1, b2) => comparer(b1, b2));
         }
 
-        public List<Book> GetBookList()
+
+        public IEnumerable<Book> Books()
         {
-            return bookList;
+            return bookList.AsEnumerable();
         }
         private void AddBook(Book book)
         {
@@ -164,10 +165,6 @@ namespace LibraryManager.service
             }
         }
 
-
-
-
-
         public void PrintAllBooks()
         {
             foreach (var book in bookList)
@@ -178,13 +175,9 @@ namespace LibraryManager.service
 
         public void PrintAllEBooks()
         {
-            foreach (var book in bookList)
+            foreach (var book in bookList.OfType<EBook>())
             {
-                if (book.IsEbook)
-                {
                     book.PrintBookDetails();
-                }
-
             }
         }
         private string DisplayMessage(string action)

@@ -1,23 +1,24 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace LibraryManager.media
-{
-    public class Book
+{ 
+[JsonDerivedType(typeof(Book), typeDiscriminator: "book")]
+[JsonDerivedType(typeof(EBook), typeDiscriminator: "ebook")]
+public class Book
     {
         public static int TotalBooks {get; set; }
         public string Title { get; set; }
         public string Author { get; set; }
         public string ISBN { get; set; }
-        public bool IsEbook { get; set; }
         public bool IsBorrowed { get; set; }
 
 
-        public Book(string title, string author, string isbn, bool isEbook, bool isBorrowed)
+        public Book(string title, string author, string isbn, bool isBorrowed = false)
         {
             Title = title;
             Author = author;
             ISBN = isbn;
-            IsEbook = isEbook;
             IsBorrowed = isBorrowed;
 
             TotalBooks++;
@@ -51,17 +52,23 @@ namespace LibraryManager.media
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("This book is currently borrowed.");
+                Console.ResetColor();
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("This book is available.");
+                Console.ResetColor();
             }
-            Console.ResetColor();
-            if (!IsEbook)
+            if (this is EBook)
             {
-                Console.WriteLine("\n-------------\n");
+                Console.WriteLine();
             }
+            else
+            {
+                Console.WriteLine("\n------------------------\n");
+            } 
+          
         }
 
     }

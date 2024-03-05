@@ -5,11 +5,15 @@ using System.Text.Json;
 
 public class FileManager : IStorable<Book>
 {
-    public void Save(List<Book> books, string fileName)
+    public void Save(IEnumerable<Book> books, string fileName)
     {
         string directory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
         string filePath = Path.Combine(directory, fileName);
 
+        var opt = new JsonSerializerOptions()
+        {
+            WriteIndented = true
+        };
         string json = JsonSerializer.Serialize(books);
         File.WriteAllText(filePath, json);
         Console.WriteLine("Library saved to file successfully.");

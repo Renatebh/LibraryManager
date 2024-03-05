@@ -8,7 +8,7 @@ namespace LibraryManager.@interface
 {
     internal interface IStorable<T>
     {
-        void Save(List<T> items, string filePath);
+        void Save(IEnumerable<T> items, string filePath);
         List<T> Load(string filePath);
     }
 }

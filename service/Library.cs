@@ -23,33 +23,33 @@ namespace LibraryManager.service
 
 
 
-        public void ManageBookAction(Book item, BookAction action)
-        {
-            switch (action)
-            {
-                case BookAction.AddBook:
-                    AddBook(item);
-                    break;
-                case BookAction.AddEBook:
-                    AddEBook((EBook)item);
-                    break;
-                case BookAction.Delete:
-                    DeleteBook(item);
-                    break;
-                case BookAction.DeleteEBook:
-                    DeleteEBook((EBook)item);
-                    break;
-                case BookAction.Borrow:
-                    BorrowBook(item);
-                    break;
-                case BookAction.Return:
-                    ReturnBook(item);
-                    break;
-                default:
-                    Console.WriteLine("Invalid action");
-                    break;
-            }
-        }
+        //public void ManageBookAction(Book item, BookAction action)
+        //{
+        //    switch (action)
+        //    {
+        //        case BookAction.AddBook:
+        //            AddBook(item);
+        //            break;
+        //        case BookAction.AddEBook:
+        //            AddEBook((EBook)item);
+        //            break;
+        //        case BookAction.Delete:
+        //            DeleteBook(item);
+        //            break;
+        //        case BookAction.DeleteEBook:
+        //            DeleteEBook((EBook)item);
+        //            break;
+        //        case BookAction.Borrow:
+        //            BorrowBook(item);
+        //            break;
+        //        case BookAction.Return:
+        //            ReturnBook(item);
+        //            break;
+        //        default:
+        //            Console.WriteLine("Invalid action");
+        //            break;
+        //    }
+        //}
 
         public delegate int BookComparer(Book b1, Book b2);
 
@@ -69,7 +69,7 @@ namespace LibraryManager.service
         {
             return bookList.AsEnumerable();
         }
-        private void AddBook(Book book)
+        public void AddBook(Book book)
         {
             // Console.WriteLine($"Adding/deleting book to/from library: {bookList.Contains(book)}");
             // Console.WriteLine($"Checking if book exists in library: {bookList.Contains(book)}");
@@ -84,24 +84,26 @@ namespace LibraryManager.service
             }
         }
 
-        private void AddEBook(EBook eBook)
-        {
-            if (!bookList.Contains(eBook))
-            {
-                bookList.Add(eBook);
-                Console.WriteLine(DisplayMessage("added"));
-            }
-            else
-            {
-                Console.WriteLine(DisplayMessage("exists"));
-            }
-        }
+        //private void AddEBook(EBook eBook)
+        //{
+        //    if (!bookList.Contains(eBook))
+        //    {
+        //        bookList.Add(eBook);
+        //        Console.WriteLine(DisplayMessage("added"));
+        //    }
+        //    else
+        //    {
+        //        Console.WriteLine(DisplayMessage("exists"));
+        //    }
+        //}
 
-        private void DeleteBook(Book book)
+        public void DeleteBook(string isbn)
         {
-            if (bookList.Contains(book))
+            Book bookToDelete = bookList.FirstOrDefault(book => book.ISBN.Equals(isbn, StringComparison.OrdinalIgnoreCase));
+
+            if (bookToDelete != null)
             {
-                bookList.Remove(book);
+                bookList.Remove(bookToDelete);
                 Console.WriteLine(DisplayMessage("deleted"));
             }
             else
@@ -110,22 +112,11 @@ namespace LibraryManager.service
             }
         }
 
-        private void DeleteEBook(EBook eBook)
-        {
-            if (bookList.Contains(eBook))
-            {
-                bookList.Remove(eBook);
-                Console.WriteLine(DisplayMessage("deleted"));
-            }
-            else
-            {
-                Console.WriteLine(DisplayMessage("not found"));
-            }
-        }
 
-        private void BorrowBook(Book book)
+        public void BorrowBook(string isbn)
         {
-            Book foundBook = bookList.Find(b => b.Equals(book));
+            Book foundBook = bookList.FirstOrDefault(book => book.ISBN.Equals(isbn, StringComparison.OrdinalIgnoreCase));
+
             if (foundBook != null)
             {
                 if (!foundBook.IsBorrowed)
@@ -144,15 +135,17 @@ namespace LibraryManager.service
             }
         }
 
-        private void ReturnBook(Book book)
+
+        public void ReturnBook(string isbn)
         {
-            Book foundBook = bookList.Find(b => b.Equals(book));
+            Book foundBook = bookList.FirstOrDefault(book => book.ISBN.Equals(isbn, StringComparison.OrdinalIgnoreCase));
+
             if (foundBook != null)
             {
-                if (foundBook.IsBorrowed) // Sjekk om boken er lånt ut før du setter IsBorrowed til false
+                if (foundBook.IsBorrowed)
                 {
                     foundBook.IsBorrowed = false;
-                    Console.WriteLine(DisplayMessage("returned"));
+                    Console.WriteLine("Book returned successfully");
                 }
                 else
                 {
@@ -161,9 +154,10 @@ namespace LibraryManager.service
             }
             else
             {
-                Console.WriteLine(DisplayMessage("not found"));
+                Console.WriteLine("Book not found in the library");
             }
         }
+
 
         public void PrintAllBooks()
         {

@@ -1,9 +1,10 @@
 ﻿using System;
-using System.ComponentModel;
+using System.Collections.Generic;
 using LibraryManager;
 using LibraryManager.media;
 using LibraryManager.service;
 using Microsoft.VisualBasic;
+using BookSearch = LibraryManager.service.BookSearch;
 
 class Program
 {
@@ -14,72 +15,34 @@ class Program
 
     static void Main(string[] args)
     {
+      
+        InitializeLibrary();
+        DisplayWelcomeMessage();
 
+        try
+        {
+            while (true)
+            {
+                DisplayMenu();
+
+                string choice = Console.ReadLine();
+                ProcessMenuChoice(choice);
+            }
+        }
+        catch (ExitProgramException)
+        {
+            Console.WriteLine("Exiting program");
+        }
+    }
+
+    static void InitializeLibrary()
+    {
         List<Book> loadedBooks = fileManager.Load(Program.FilePath);
         foreach (var book in loadedBooks)
         {
-            library.ManageBookAction(book, BookAction.AddBook); // Legg til boken i biblioteket
+            library.AddBook(book);
         }
-
-       
-        DisplayWelcomeMessage(); 
-
-
-        while (true)
-        {
-            DisplayMenu();
-            string choice = Console.ReadLine();
-
-            switch (choice)
-            {
-                case "1":
-                    ProcessAction(BookAction.AddBook);
-                    break;
-                case "2":
-                    ProcessAction(BookAction.AddEBook);
-                    break;
-                case "3":
-                    ProcessAction(BookAction.Delete);
-                    break;
-                case "4":
-                    ProcessAction(BookAction.DeleteEBook);
-                    break;
-                case "5":
-                    ProcessAction(BookAction.Borrow);
-                    break;
-                case "6":
-                    ProcessAction(BookAction.Return);
-                    break;
-                case "7":
-                    library.SortBooks(Library.SortByTitle);
-                    library.PrintAllBooks();
-                    break;
-                case "8":
-                    library.SortBooks(Library.SortByTitle);
-                    library.PrintAllEBooks();
-                    break;
-                case "9":
-                    fileManager.Save(library.Books(), Program.FilePath);
-                    break;
-                case "10":
-                    fileManager.Load(Program.FilePath);
-                    break;
-                case "11":
-                    Console.WriteLine("Enter the search term:");
-                    string searchTerm = Console.ReadLine();
-                    SearchBooks(searchTerm);
-                    break;
-                case "12":
-                    Console.WriteLine("Exiting program");
-                    return;
-                default:
-                    Console.WriteLine("Invalid choice");
-                    break;
-            }
-        }
-
     }
-
     static void DisplayWelcomeMessage()
     {
         Console.Clear();
@@ -91,65 +54,107 @@ class Program
         Console.ReadLine();
     }
 
-
     static void DisplayMenu()
     {
         Console.ResetColor();
         Console.WriteLine("\n=== Library Menu ===\n");
         Console.WriteLine("1: Add New Book");
-        Console.WriteLine("2: Add New E-Book");
-        Console.WriteLine("3: Delete Book");
-        Console.WriteLine("4: Delete E-Book");
-        Console.WriteLine("5: Borrow Book");
-        Console.WriteLine("6: Return Book");
-        Console.WriteLine("7: Print All Books");
-        Console.WriteLine("8: Print All E-Books");
-        Console.WriteLine("9: Save library to file");
-        Console.WriteLine("10: Load library from file");
-        Console.WriteLine("11: Search books");
-        Console.WriteLine("12: Exit Program");
+        Console.WriteLine("2: Delete Book");
+        Console.WriteLine("3: Borrow Book");
+        Console.WriteLine("4: Return Book");
+        Console.WriteLine("5: Print All Books");
+        Console.WriteLine("6: Save library to file");
+        Console.WriteLine("7: Load library from file");
+        Console.WriteLine("8: Search books");
+        Console.WriteLine("9: Exit Program");
         Console.WriteLine();
         Console.Write("Enter your choice: ");
         Console.WriteLine();
     }
 
-    static void ProcessAction(BookAction action)
+    static void ProcessMenuChoice(string choice)
     {
-        Console.ResetColor();
-        string actionString = action.ToString().ToLower();
-        Console.WriteLine("\n\n----------------------------\n\n");
-        Console.WriteLine($"\nEnter the details of the book you want to {actionString}: \n");
-        Console.ForegroundColor = ConsoleColor.White;
-        string title = GetInput("Title: ");
-        string author = GetInput("Author: ");
-
-        string isbn = GetISBN();
-        bool isEbook = action == BookAction.AddEBook;
-        
-
-        switch (action)
-        { 
-            case BookAction.AddBook:
-            case BookAction.Delete:
-            case BookAction.Borrow:
-            case BookAction.Return:
-                bool isBorrowed = action == BookAction.Borrow;
-                Book newBook = new Book(title, author, isbn, isBorrowed);
-                library.ManageBookAction(newBook, action);
+        switch (choice)
+        {
+            case "1":
+                AddItem();
                 break;
-            case BookAction.AddEBook:
-            case BookAction.DeleteEBook:
-
-                string filePath = GetInput("File Path: ");
-                string fileFormat = GetInput("File Format: ");
-                EBook newEBook = new EBook(title, author, isbn, filePath, fileFormat);
-                library.ManageBookAction(newEBook, action);
+            case "2":
+                DeleteItem();
                 break;
+            case "3":
+                BorrowItem();
+                break;
+            case "4":
+                ReturnItem();
+                break;
+            case "5":
+                library.PrintAllBooks();
+                break;
+            case "6":
+                fileManager.Save(library.Books(), Program.FilePath);
+                break;
+            case "7":
+                fileManager.Load(Program.FilePath);
+                break;
+            case "8":
+                Console.WriteLine("Enter the search term:");
+                string searchTerm = Console.ReadLine();
+                SearchBooks(searchTerm);
+                break;
+            case "9":
+                throw new ExitProgramException();
             default:
-                Console.WriteLine("Invalid action");
+                Console.WriteLine("Invalid choice");
                 break;
         }
     }
+
+    public class ExitProgramException : Exception { }
+    static void AddItem()
+    {
+        Console.WriteLine("Is this an Ebook? (Y/N)");
+        string isEbook = Console.ReadLine().ToLower();
+        bool isEBook = isEbook == "y";
+
+        string title = GetInput("Title: ");
+        string author = GetInput("Author: ");
+        string isbn = GetISBN();
+
+        Book newBook;
+
+        if (isEBook)
+        {
+            string filePath = GetInput("File Path: ");
+            string fileFormat = GetInput("File Format: ");
+            newBook = new EBook(title, author, isbn, filePath, fileFormat);
+        }
+        else
+        {
+            newBook = new Book(title, author, isbn);
+        }
+
+        library.AddBook(newBook);
+    }
+
+    static void DeleteItem()
+    {
+        string isbn = GetISBN();
+        library.DeleteBook(isbn);
+    }
+
+    static void BorrowItem()
+    {
+        string isbn = GetISBN();
+        library.BorrowBook(isbn);
+    }
+
+    static void ReturnItem()
+    {
+        string isbn = GetISBN();
+        library.ReturnBook(isbn);
+    }
+
     static string GetInput(string prompt)
     {
         string input;
@@ -188,7 +193,6 @@ class Program
         return isbn;
     }
 
-
     static void SearchBooks(string searchTerm)
     {
         List<Book> searchResults = bookSearch.SearchBooks(searchTerm);
@@ -196,7 +200,7 @@ class Program
 
         if (searchResults.Count == 0)
         {
-            Console.ForegroundColor= ConsoleColor.Red;
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("No results found.");
             Console.ResetColor();
         }
@@ -212,14 +216,3 @@ class Program
         Console.ReadLine();
     }
 }
-
-    public enum BookAction
-    {
-        AddBook,
-        PrintBook,
-        Delete,
-        Borrow,
-        Return,
-        AddEBook,
-        DeleteEBook
-    }
